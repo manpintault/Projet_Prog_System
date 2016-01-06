@@ -29,9 +29,12 @@ evaluer_expr(Expression *e)
         case PIPE: 
           expression_pipe(e);
           break;
-	case REDIRECTION_I: break; // redirection de l'entr�e (<)	 	
+	case REDIRECTION_I: 
+                
+                break; // redirection de l'entr�e (<)	 	
 	case REDIRECTION_O: // redirection de la sortie (>)		
-		break;
+          expression_redirection_fichier(e);		
+          break;
 	case REDIRECTION_A: // redirection de la sortie en mode APPEND (>>)		
 	case REDIRECTION_E: // redirection de la sortie erreur
 	case REDIRECTION_EO : // redirection des sorties erreur et standard.
