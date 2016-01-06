@@ -94,74 +94,11 @@ void afficher_exprL(Expression *e, int indentation, int trait)
   }
 }
 
-void appeler_expr(Expression *e) {
-  if (e == NULL) 
-    return;
- 
-  switch(e->type){
-	case VIDE :
-	  break;
-	
-	case SIMPLE : 
-		expression_simple(e); 
-		break;
-	case SEQUENCE_OU : 
-                expression_ou(e);
-		break; 
-        case PIPE: 
-          expression_pipe(e);
-          break;
-	case REDIRECTION_I: break; // redirection de l'entr�e (<)	 	
-	case REDIRECTION_O: // redirection de la sortie (>)		
-        expression_redirection_fichier(e);
-		break;
-	case REDIRECTION_A: // redirection de la sortie en mode APPEND (>>)		
-	case REDIRECTION_E: // redirection de la sortie erreur
-	case REDIRECTION_EO : // redirection des sorties erreur et standard.
-	  break;
-	case BG: // tache en arriere plan (&)	
-	case SOUS_SHELL:
-	  break;
-	default :  // &&, Sequence
-		appeler_expr(e->gauche);
-		appeler_expr(e->droite);
-  }
-}
 
 void afficher_expr(Expression *e)
 {
   afficher_exprL(e,4,4);
-  appeler_expr(e);
 }
-
-// Trouver méthode pour imprimer "Command not found"
-void expression_ou(Expression *e) {
-	  if ((execvp (e->gauche->arguments[0], e->gauche->arguments)) != -1) 
-            expression_simple(e->gauche);
-          else {
-            perror(e->gauche->arguments[0]);
-	    if ((execvp (e->droite->arguments[0], e->droite->arguments)) != -1)
-              expression_simple(e->droite);
-            else 
-              perror(e->droite->arguments[0]);      
-      }
-}
-
-void expression_simple(Expression *e) {
-	  int status;
-	  pid_t pid = fork();
-	  if (pid == 0) {
-	    execvp (e->arguments[0], e->arguments);
-	    perror(e->arguments[0]);
-	    exit(1);
-	  }
-	  else {
-	    waitpid(pid, &status, 0);
-	    return;
-	  }
-	  printf("%s\n", execv(e->arguments[0], e->arguments));
-  }
-
 
 
  

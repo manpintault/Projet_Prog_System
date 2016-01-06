@@ -232,6 +232,7 @@ main (int argc, char **argv)
   while (1){
     if (my_yyparse () == 0) {  /* L'analyse a abouti */   
       afficher_expr(ExpressionAnalysee);
+      evaluer_expr(ExpressionAnalysee);
       fflush(stdout);
       expression_free(ExpressionAnalysee);
     }
