@@ -3,6 +3,10 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 
 char *chaine_type[] = {
@@ -20,7 +24,7 @@ char *chaine_type[] = {
   "REDIRECTION_EO",
   "SOUS_SHELL"};
 
-
+#define BUFFER_SIZE 255
 
 void indenter_vide(int indentation, int trait){
   for(int i = 1; i<= indentation + trait; i++)
@@ -64,7 +68,7 @@ void afficher_exprL(Expression *e, int indentation, int trait)
       printf("[%s]",e->arguments[i]);
     putchar('\n');
     break;
-
+    
   case REDIRECTION_I: 	
   case REDIRECTION_O: 	
   case REDIRECTION_A: 	
@@ -101,8 +105,16 @@ void appeler_expr(Expression *e) {
 	case SIMPLE : 
 		expression_simple(e); 
 		break;
-	case REDIRECTION_I: // redirection de l'entr�e (<)	 	
+	case SEQUENCE_OU : 
+                expression_ou(e);
+		break; 
+        case PIPE: 
+          expression_pipe(e);
+          break;
+	case REDIRECTION_I: break; // redirection de l'entr�e (<)	 	
 	case REDIRECTION_O: // redirection de la sortie (>)		
+        expression_redirection_fichier(e);
+		break;
 	case REDIRECTION_A: // redirection de la sortie en mode APPEND (>>)		
 	case REDIRECTION_E: // redirection de la sortie erreur
 	case REDIRECTION_EO : // redirection des sorties erreur et standard.
@@ -110,7 +122,7 @@ void appeler_expr(Expression *e) {
 	case BG: // tache en arriere plan (&)	
 	case SOUS_SHELL:
 	  break;
-	default :  
+	default :  // &&, Sequence
 		appeler_expr(e->gauche);
 		appeler_expr(e->droite);
   }
@@ -122,8 +134,20 @@ void afficher_expr(Expression *e)
   appeler_expr(e);
 }
 
+// Trouver méthode pour imprimer "Command not found"
+void expression_ou(Expression *e) {
+	  if ((execvp (e->gauche->arguments[0], e->gauche->arguments)) != -1) 
+            expression_simple(e->gauche);
+          else {
+            perror(e->gauche->arguments[0]);
+	    if ((execvp (e->droite->arguments[0], e->droite->arguments)) != -1)
+              expression_simple(e->droite);
+            else 
+              perror(e->droite->arguments[0]);      
+      }
+}
 
-  void expression_simple(Expression *e) {
+void expression_simple(Expression *e) {
 	  int status;
 	  pid_t pid = fork();
 	  if (pid == 0) {
@@ -137,3 +161,10 @@ void afficher_expr(Expression *e)
 	  }
 	  printf("%s\n", execv(e->arguments[0], e->arguments));
   }
+
+
+
+ 
+
+
+
