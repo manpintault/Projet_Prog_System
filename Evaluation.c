@@ -2,6 +2,9 @@
 #include "Evaluation.h"
 #include "Commandes_Internes.h"
 
+
+
+
 int
 evaluer_expr(Expression *e)
 {
@@ -30,12 +33,13 @@ evaluer_expr(Expression *e)
           expression_pipe(e);
           break;
 	case REDIRECTION_I: 
-                
-                break; // redirection de l'entr�e (<)	 	
+          break; // redirection de l'entr�e (<)	 	
 	case REDIRECTION_O: // redirection de la sortie (>)		
           expression_redirection_fichier(e);		
           break;
-	case REDIRECTION_A: // redirection de la sortie en mode APPEND (>>)		
+	case REDIRECTION_A: // redirection de la sortie en mode APPEND (>>)
+          expression_redirection_fichier_append(e);
+          break;		
 	case REDIRECTION_E: // redirection de la sortie erreur
 	case REDIRECTION_EO : // redirection des sorties erreur et standard.
 	  break;
