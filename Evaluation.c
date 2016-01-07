@@ -33,6 +33,7 @@ evaluer_expr(Expression *e)
           expression_pipe(e);
           break;
 	case REDIRECTION_I: 
+          expression_redirection_commande(e);
           break; // redirection de l'entr�e (<)	 	
 	case REDIRECTION_O: // redirection de la sortie (>)		
           expression_redirection_fichier(e);		
@@ -44,7 +45,10 @@ evaluer_expr(Expression *e)
 	case REDIRECTION_EO : // redirection des sorties erreur et standard.
 	  break;
 	case BG: // tache en arriere plan (&)	
+          break;
 	case SOUS_SHELL:
+          	evaluer_expr(e->gauche);
+		evaluer_expr(e->droite);
 	  break;
 	default : 
          fprintf(stderr,"fonctionnalité non implémentée\n");
