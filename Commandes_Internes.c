@@ -27,7 +27,7 @@ void expression_ou(Expression *e) {
 int expression_commande_interne(Expression *e) {
          
        if (strcmp(e->arguments[0],"echo") == 0) {
-         execvp("/bin/echo", e->arguments); 
+	       execvp("/bin/echo", e->arguments); 
          return 1;
        }
        else if (strcmp(e->arguments[0],"pwd") == 0) {
@@ -56,8 +56,25 @@ int expression_commande_interne(Expression *e) {
 
 
 void expression_simple(Expression *e) {
-   int commandeInterne = expression_commande_interne(e);
-   if (commandeInterne == 0) {
+	
+   if ((strcmp(e->arguments[0],"echo") == 0) || (strcmp(e->arguments[0],"kill") == 0) || (strcmp(e->arguments[0],"pwd") == 0) || (strcmp(e->arguments[0],"date") == 0 ) || (strcmp(e->arguments[0],"hostname") == 0) || (strcmp(e->arguments[0],"history") == 0)) {
+	   char str[100];
+	   strcpy(str, e->arguments[0]);
+	   for (int i = 1; e->arguments[i] != NULL; i++) {
+	     strcat(str, " ");
+	     strcat(str, e->arguments[i]);
+           }
+	   system(str);
+       }
+       else if (strcmp(e->arguments[0],"exit") == 0){
+		exit(EXIT_SUCCESS);
+	}
+	else if (strcmp(e->arguments[0],"cd") == 0){
+           char str[100];
+	   strcpy(str, e->arguments[1]);	
+           chdir(str);
+        }
+       else {
           int status;
 	    pid_t pid = fork();
 	    if (pid == 0) {
@@ -70,7 +87,7 @@ void expression_simple(Expression *e) {
 	      return;
 	    }
 	    printf("%s\n", execv(e->arguments[0], e->arguments));
- }
+    }
 }
 
 
