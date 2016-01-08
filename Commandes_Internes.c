@@ -9,6 +9,8 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <readline/history.h>
+
 
 // Trouver méthode pour imprimer "Command not found"
 void expression_ou(Expression *e) {
@@ -58,8 +60,7 @@ int expression_commande_interne(Expression *e) {
 void expression_simple(Expression *e) {
 	
    if ((strcmp(e->arguments[0],"echo") == 0) || (strcmp(e->arguments[0],"kill") == 0) || (strcmp(e->arguments[0],"pwd") == 0) 
-        || (strcmp(e->arguments[0],"date") == 0 ) || (strcmp(e->arguments[0],"hostname") == 0) 
-        || (strcmp(e->arguments[0],"history") == 0)) {
+        || (strcmp(e->arguments[0],"date") == 0 ) || (strcmp(e->arguments[0],"hostname") == 0)) {
 	   char str[100];
 	   strcpy(str, e->arguments[0]);
 	   for (int i = 1; e->arguments[i] != NULL; i++) {
@@ -68,9 +69,13 @@ void expression_simple(Expression *e) {
            }
 	   system(str);
        }
+       else if (strcmp(e->arguments[0],"history") == 0){
+	 commande_history();
+       }
        else if (strcmp(e->arguments[0],"exit") == 0){
 		exit(EXIT_SUCCESS);
 	}
+
 	else if (strcmp(e->arguments[0],"cd") == 0){
            char str[100];
 	   strcpy(str, e->arguments[1]);	
@@ -211,5 +216,12 @@ void expression_arriere_plan(Expression *e) {
   if (pid == 0) {
     expression_simple(e->gauche);
     setpgid(0, 0);
+  }
+}
+
+void commande_history() {
+  HIST_ENTRY ** historique = history_list();
+  for (int i = 0; historique[i] != NULL; i++) {
+    printf("%d  %s\n", i,historique[i]->line);
   }
 }
