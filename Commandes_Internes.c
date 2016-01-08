@@ -57,7 +57,9 @@ int expression_commande_interne(Expression *e) {
 
 void expression_simple(Expression *e) {
 	
-   if ((strcmp(e->arguments[0],"echo") == 0) || (strcmp(e->arguments[0],"kill") == 0) || (strcmp(e->arguments[0],"pwd") == 0) || (strcmp(e->arguments[0],"date") == 0 ) || (strcmp(e->arguments[0],"hostname") == 0) || (strcmp(e->arguments[0],"history") == 0)) {
+   if ((strcmp(e->arguments[0],"echo") == 0) || (strcmp(e->arguments[0],"kill") == 0) || (strcmp(e->arguments[0],"pwd") == 0) 
+        || (strcmp(e->arguments[0],"date") == 0 ) || (strcmp(e->arguments[0],"hostname") == 0) 
+        || (strcmp(e->arguments[0],"history") == 0)) {
 	   char str[100];
 	   strcpy(str, e->arguments[0]);
 	   for (int i = 1; e->arguments[i] != NULL; i++) {
@@ -202,3 +204,12 @@ void expression_redirection_commande(Expression *e) {
   } 
 }
 
+
+void expression_arriere_plan(Expression *e) {
+  int status;
+  pid_t pid = fork();
+  if (pid == 0) {
+    expression_simple(e->gauche);
+    setpgid(0, 0);
+  }
+}

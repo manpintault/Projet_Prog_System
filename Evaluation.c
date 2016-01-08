@@ -45,6 +45,7 @@ evaluer_expr(Expression *e)
 	case REDIRECTION_EO : // redirection des sorties erreur et standard.
 	  break;
 	case BG: // tache en arriere plan (&)	
+          expression_arriere_plan(e);
           break;
 	case SOUS_SHELL:
           	evaluer_expr(e->gauche);
