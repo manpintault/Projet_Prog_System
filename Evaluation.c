@@ -33,17 +33,21 @@ evaluer_expr(Expression *e)
           break;
 	case REDIRECTION_I: 
           expression_redirection_commande(e);
-          break; // redirection de l'entr�e (<)	 	
-	case REDIRECTION_O: // redirection de la sortie (>)		
+          break;  	
+	case REDIRECTION_O: 		
           expression_redirection_fichier(e);		
           break;
-	case REDIRECTION_A: // redirection de la sortie en mode APPEND (>>)
+	case REDIRECTION_A:
           expression_redirection_fichier_append(e);
           break;		
-	case REDIRECTION_E: // redirection de la sortie erreur
-	case REDIRECTION_EO : // redirection des sorties erreur et standard.
+	case REDIRECTION_E:
+          expression_redirection_fichier_stderr(e);
+          break; 
+	case REDIRECTION_EO :
+          expression_redirection_fichier_stderr_stdout(e);
+
 	  break;
-	case BG: // tache en arriere plan (&)	
+	case BG:	
           expression_arriere_plan(e);
           break;
 	case SOUS_SHELL:

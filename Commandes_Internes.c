@@ -128,10 +128,77 @@ void expression_pipe(Expression *e) {
    fd = open(e->arguments[0], O_CREAT | O_TRUNC | O_WRONLY, 0666); 
    while ( (nmLus = read(tube[0], aLire, N)) > 0)
      write(fd, aLire, nmLus);
+   close(fd);
    close(tube[0]); 
   } 
-
 }
+
+
+
+ void expression_redirection_fichier_stderr(Expression *e) {
+  int tube[2], enregistrer, status, fd, nmLus, N = 4;
+  char aLire[N]; 
+  
+  pipe(tube);  
+  pid_t pid = fork();
+  enregistrer = dup(2);
+  
+  if (pid == 0) {
+    close(tube[0]);
+    enregistrer = dup(2);
+    dup2(tube[1], 2); 
+    close(tube[1]);
+    execvp (e->gauche->arguments[0], e->gauche->arguments);
+    dup2(2, enregistrer);
+  }
+  else {
+   wait(&status);
+   close(tube[1]);
+   fd = open(e->arguments[0], O_CREAT | O_TRUNC | O_WRONLY, 0666); 
+   while ( (nmLus = read(tube[0], aLire, N)) > 0)
+     write(fd, aLire, nmLus);
+   close(tube[0]); 
+   close(fd);
+
+  } 
+}
+
+
+
+ void expression_redirection_fichier_stderr_stdout(Expression *e) {
+  int tube[2], enregistrer, enregistrer2, status, fd, nmLus, N = 4;
+  char aLire[N]; 
+  
+  pipe(tube);  
+  pid_t pid = fork();
+  enregistrer = dup(2);
+  enregistrer2 = dup(1);
+  if (pid == 0) {
+    close(tube[0]);
+    enregistrer = dup(2);
+    enregistrer2 = dup(1);
+
+    dup2(tube[1], 2); 
+    dup2(tube[1], 1); 
+
+    close(tube[1]);
+    execvp (e->gauche->arguments[0], e->gauche->arguments);
+    dup2(2, enregistrer);
+    dup2(1, enregistrer2);
+
+  }
+  else {
+   wait(&status);
+   close(tube[1]);
+   fd = open(e->arguments[0], O_CREAT | O_TRUNC | O_WRONLY, 0666); 
+   while ( (nmLus = read(tube[0], aLire, N)) > 0)
+     write(fd, aLire, nmLus);
+   close(tube[0]); 
+    dup2(2, enregistrer);
+
+  } 
+}
+
 
  void expression_redirection_fichier_append(Expression *e) {
   int tube[2], enregistrer, status, fd, nmLus, N = 4;
