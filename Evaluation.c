@@ -8,6 +8,7 @@
 int
 evaluer_expr(Expression *e)
 {
+  int arret = 0;
   if (e == NULL) 
     return;
  
@@ -16,19 +17,17 @@ evaluer_expr(Expression *e)
 	  break;
 	
 	case SIMPLE : 
-		expression_simple(e); 
+	  return expression_simple(e);     
 		break;
-        case SEQUENCE : 
-          	evaluer_expr(e->gauche);
-		evaluer_expr(e->droite);
-                break;
+        case SEQUENCE :
+          return expression_sequence(e);
+          break;
 	case SEQUENCE_OU : 
-                expression_ou(e);
-		break; 
+          return expression_ou(e);
+          break; 
         case SEQUENCE_ET : 
-		evaluer_expr(e->gauche);
-		evaluer_expr(e->droite);
-                break;
+          return expression_et(e);
+          break;
         case PIPE: 
           expression_pipe(e);
           break;
@@ -48,8 +47,7 @@ evaluer_expr(Expression *e)
           expression_arriere_plan(e);
           break;
 	case SOUS_SHELL:
-          	evaluer_expr(e->gauche);
-		evaluer_expr(e->droite);
+          	return expression_sous_shell(e);
 	  break;
 	default : 
          fprintf(stderr,"fonctionnalité non implémentée\n");

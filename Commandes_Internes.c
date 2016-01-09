@@ -12,53 +12,34 @@
 #include <readline/history.h>
 
 
-// Trouver méthode pour imprimer "Command not found"
 void expression_ou(Expression *e) {
-	  if ((execvp (e->gauche->arguments[0], e->gauche->arguments)) != -1) 
-            expression_simple(e->gauche);
+	  if (evaluer_expr(e->gauche) == -1) {
+            return evaluer_expr(e->droite);
+            }
           else {
-            perror(e->gauche->arguments[0]);
-	    if ((execvp (e->droite->arguments[0], e->droite->arguments)) != -1)
-              expression_simple(e->droite);
-            else 
-              perror(e->droite->arguments[0]);      
-      }
+           return 1;
+          }
 }
 
 
-int expression_commande_interne(Expression *e) {
-         
-       if (strcmp(e->arguments[0],"echo") == 0) {
-	       execvp("/bin/echo", e->arguments); 
-         return 1;
-       }
-       else if (strcmp(e->arguments[0],"pwd") == 0) {
-         execvp("/bin/pwd", e->arguments); 
-         return 1;
-       }
-       else if (strcmp(e->arguments[0],"date") == 0) {
-         execvp("/bin/date", e->arguments); 
-         return 1;
-       }
-       else if (strcmp(e->arguments[0],"hostname") == 0) {
-         execvp("/bin/hostname", e->arguments); 
-         return 1;
-       }
-      else if (strcmp(e->arguments[0],"kill") == 0) {
-         execvp("/bin/kill", e->arguments); 
-         return 1;
-       }
-      else if (strcmp(e->arguments[0],"history") == 0) {
-         execvp("/bin/history", e->arguments); 
-         return 1;
-       }
-
-      return 0;
-  }
+int expression_et(Expression *e) {
+     if (evaluer_expr(e->gauche) != -1)
+       return evaluer_expr(e->droite);
+     else
+       return -1;
+}
 
 
-void expression_simple(Expression *e) {
-	
+int expression_sequence(Expression *e) {
+  evaluer_expr(e->gauche);
+  return evaluer_expr(e->droite);
+}
+
+int expression_sous_shell(Expression *e) {
+  return evaluer_expr(e->gauche);
+}
+
+int expression_simple(Expression *e) {
    if ((strcmp(e->arguments[0],"echo") == 0) || (strcmp(e->arguments[0],"kill") == 0) || (strcmp(e->arguments[0],"pwd") == 0) 
         || (strcmp(e->arguments[0],"date") == 0 ) || (strcmp(e->arguments[0],"hostname") == 0)) {
 	   char str[100];
@@ -85,15 +66,17 @@ void expression_simple(Expression *e) {
           int status;
 	    pid_t pid = fork();
 	    if (pid == 0) {
-	      execvp (e->arguments[0], e->arguments);
-	      perror(e->arguments[0]);
-	      exit(1);
+	      if (execvp (e->arguments[0], e->arguments) == -1) {
+	        perror(e->arguments[0]);
+                return -1;
+              }
 	    }
 	    else {
 	      waitpid(pid, &status, 0);
-	      return;
+	      return 1;
 	    }
 	    printf("%s\n", execv(e->arguments[0], e->arguments));
+            return 1;
     }
 }
 
