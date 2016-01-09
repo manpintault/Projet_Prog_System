@@ -62,6 +62,12 @@ int expression_simple(Expression *e) {
 	   strcpy(str, e->arguments[1]);	
            chdir(str);
         }
+	else if((strcmp(e->arguments[0],"remote") == 0)&&(strcmp(e->arguments[1],"add") == 0)){
+		remote_add(e);
+	}
+	else if((strcmp(e->arguments[0],"remote") == 0)&&(strcmp(e->arguments[1],"remove") == 0)){
+		remote_remove(e);
+	}
        else {
           int status;
 	    pid_t pid = fork();
@@ -275,3 +281,71 @@ void commande_history() {
     printf("%d  %s\n", i,historique[i]->line);
   }
 }
+
+void remote_add (Expression *e){
+	int fd= open("connexion.txt",O_WRONLY|O_CREAT, 0666);
+	char str[10];
+	char str2[100];
+
+	strcpy(str,e->arguments[2]);
+	strcat(str,"\n");
+	
+
+	strcpy(str2,"ssh ");
+	strcat(str2,e->arguments[2]);
+	strcat(str2,"\n");
+	
+	if(e->arguments[3]!=NULL){
+		for(int i=3; e->arguments[i]!=NULL; i++){
+			
+			strcat(str, e->arguments[i]);
+			strcat(str,"\n");
+			
+
+			strcat(str2,"ssh ");
+			strcat(str2,e->arguments[i]);
+			strcat(str2,"\n");
+			
+			system(str2);
+		}
+	}
+	else {
+		system(str2);
+		
+	}
+	write(fd,str,strlen(str));
+	close(fd);
+	
+	
+}
+
+void remote_remove(Expression *e){
+	
+	FILE* fd = NULL;
+	fd =fopen("connexion.txt","r");
+	
+	char str[100];
+	strcpy(str,"");
+	
+	char c[100];
+	
+	while(ftell(fd)==NULL){
+		
+		strcat(str,"ssh ");
+		fscanf(fd,"%s",c);
+		strcat(str,c);
+		strcat(str," exit \n");
+		
+		if(fgets(c,100,fd)!=NULL){
+			strcat(str,"ssh ");
+			fscanf(fd,"%s",c);
+			strcat(str,c);
+			strcat(str," exit \n");
+		}
+		
+	}
+	
+	system(str);
+	remove("connexion.txt");
+}
+
