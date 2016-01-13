@@ -2,7 +2,7 @@
 
 #include "Shell.h"
 #include "Affichage.h"
-#include <sys/types.h>
+#include <sys/types.h> b
 #include <sys/wait.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -67,6 +67,15 @@ int expression_simple(Expression *e) {
 	}
 	else if((strcmp(e->arguments[0],"remote") == 0)&&(strcmp(e->arguments[1],"remove") == 0)){
 		remote_remove(e);
+	}
+    else if((strcmp(e->arguments[0],"remote") == 0)&&(strcmp(e->arguments[1],"list") == 0)){
+		remote_list(e);
+	}
+    else if((strcmp(e->arguments[0],"remote") == 0)&&(strcmp(e->arguments[1],"all") == 0)){
+		remote_all(e);
+	}
+    else if(strcmp(e->arguments[0],"remote") == 0){
+		remote_machine_commande(e);
 	}
        else {
           int status;
@@ -293,7 +302,6 @@ void remote_add (Expression *e){
 
 	strcpy(str2,"ssh ");
 	strcat(str2,e->arguments[2]);
-	strcat(str2,"\n");
 	
 	if(e->arguments[3]!=NULL){
 		for(int i=3; e->arguments[i]!=NULL; i++){
@@ -301,10 +309,9 @@ void remote_add (Expression *e){
 			strcat(str, e->arguments[i]);
 			strcat(str,"\n");
 			
-
+			strcat(str2,"\n");
 			strcat(str2,"ssh ");
 			strcat(str2,e->arguments[i]);
-			strcat(str2,"\n");
 			
 			system(str2);
 		}
@@ -348,4 +355,68 @@ void remote_remove(Expression *e){
 	system(str);
 	remove("connexion.txt");
 }
+
+void remote_list(Expression *e){
+	
+	FILE* fd = NULL;
+	fd =fopen("connexion.txt","r");
+	char c[100];
+	
+	while(ftell(fd)==NULL){
+		fscanf(fd,"%s",c);
+		printf("%s \n",c);
+		if(fgets(c,100,fd)!=NULL){
+			fscanf(fd,"%s",c);
+			printf("%s \n",c);	
+		}	
+	}	
+}
+
+void remote_machine_commande(Expression *e){
+	
+	char str2[100];
+
+	strcpy(str2,"ssh ");
+	strcat(str2,e->arguments[1]);
+	strcat(str2," ");
+	strcat(str2, e->arguments[2]);
+	strcat(str2," &\n");
+	
+	system(str2);
+	
+}
+
+void remote_all(Expression *e){
+    
+	FILE* fd = NULL;
+	fd =fopen("connexion.txt","r");
+	
+	char str[100];
+	strcpy(str,"");
+	
+	char c[100];
+	
+	while(ftell(fd)==NULL){
+		
+		strcat(str,"ssh ");
+		fscanf(fd,"%s",c);
+		strcat(str,c);
+		strcat(str," ");
+		strcat(str, e->arguments[2]);
+		strcat(str," &\n");
+		
+		if(fgets(c,100,fd)!=NULL){
+			strcat(str,"ssh ");
+			fscanf(fd,"%s",c);
+			strcat(str,c);
+			strcat(str," ");
+		        strcat(str, e->arguments[2]);
+			strcat(str," &\n");
+		}
+		
+	}
+	system(str);
+	
+}
+
 
